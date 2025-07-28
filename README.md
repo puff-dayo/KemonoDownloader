@@ -296,6 +296,9 @@ We’re incredibly grateful to our amazing contributors who have helped shape **
   <a href="https://github.com/detached64">
     <img src="https://github.com/detached64.png" width="60px" style="border-radius: 50%;"/>
   </a>
+  <a href="https://github.com/gitwawa1">
+    <img src="https://github.com/gitwawa1.png" width="60px" style="border-radius: 50%;"/>
+  </a>
 </p>
 
 
