@@ -1,5 +1,14 @@
 # Kemono Downloader Release Notes
 
+## v4.3.0 (28 July 2025)
+**feat: Add auto rename functionality to both post and creator downloaders**
+- Add auto rename checkbox to both downloader tabs with default enabled state
+- Implement sequential file numbering (1_filename, 2_filename, etc.) when enabled
+- Maintain original filename structure while adding numerical prefix for organization
+- Update UI translations to support auto rename feature across all language files
+- Preserve file extensions and handle edge cases for filename sanitization
+- Add per-post file counter tracking for creator downloader to ensure proper sequencing
+
 ## v4.2.0 (28 July 2025)
 **feat: Add 'CLIP' Extension and domain adjustment**
 - Adjusted the domain from kemono.su to kemono.cr

@@ -772,7 +772,7 @@ class DownloadThread(QThread):
     log = pyqtSignal(str, str)
     finished = pyqtSignal()
 
-    def __init__(self, url, download_folder, selected_files, files_to_posts_map, console, other_files_dir, post_id, max_concurrent=5):
+    def __init__(self, url, download_folder, selected_files, files_to_posts_map, console, other_files_dir, post_id, max_concurrent=5, auto_rename=False):
         super().__init__()
         self.url = url
         self.download_folder = download_folder
@@ -789,6 +789,7 @@ class DownloadThread(QThread):
         self.post_files_map = self.build_post_files_map()
         self.completed_files = set()
         self.post_title = None  # Store post title
+        self.auto_rename = auto_rename
 
     def fetch_post_info(self):
         """Fetch post title."""
@@ -860,6 +861,13 @@ class DownloadThread(QThread):
         os.makedirs(post_folder, exist_ok=True)
 
         filename = file_url.split('f=')[-1] if 'f=' in file_url else file_url.split('/')[-1].split('?')[0]
+        
+        # Handle auto rename if enabled
+        if hasattr(self, 'auto_rename') and self.auto_rename:
+            file_extension = os.path.splitext(filename)[1]
+            base_name = os.path.splitext(filename)[0]
+            filename = f"{file_index + 1}_{base_name}{file_extension}"
+        
         full_path = os.path.join(post_folder, filename.replace('/', '_'))
         url_hash = hashlib.md5(file_url.encode()).hexdigest()
 
@@ -1046,6 +1054,12 @@ class PostDownloaderTab(QWidget):
         self.post_console.setStyleSheet("background: #2A3B5A; border-radius: 5px; padding: 5px;")
         left_layout.addWidget(self.post_console)
 
+        # Auto rename checkbox
+        self.auto_rename_checkbox = QCheckBox()
+        self.auto_rename_checkbox.setChecked(True)  # Set to checked by default
+        self.auto_rename_checkbox.setStyleSheet("color: white;")
+        left_layout.addWidget(self.auto_rename_checkbox)
+
         # Buttons layout
         post_btn_layout = QHBoxLayout()
         self.post_download_btn = QPushButton(qta.icon('fa5s.download', color='white'), "")
@@ -1175,6 +1189,7 @@ class PostDownloaderTab(QWidget):
         self.post_search_input.setPlaceholderText(translate("search_items"))
         
         self.update_post_queue_list()
+        self.auto_rename_checkbox.setText(translate("auto_rename"))
 
     def update_progress_bar_style(self):
         separator_style = "QProgressBar { border: 1px solid #4A5B7A; border-radius: 5px; background: #2A3B5A; } QProgressBar::chunk { background: #4A5B7A; }"
@@ -1622,8 +1637,9 @@ class PostDownloaderTab(QWidget):
         post_id = parts[-1]
 
         max_concurrent = self.parent.settings_tab.get_simultaneous_downloads()
+        auto_rename = self.auto_rename_checkbox.isChecked()
         self.thread = DownloadThread(url, self.parent.download_folder, checked_files, files_to_posts_map, 
-                                    self.post_console, self.other_files_dir, post_id, max_concurrent)
+                                    self.post_console, self.other_files_dir, post_id, max_concurrent, auto_rename)
         self.active_threads.append(self.thread)
         self.thread.file_progress.connect(self.update_file_progress)
         self.thread.file_completed.connect(self.update_file_completion)

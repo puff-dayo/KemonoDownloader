@@ -9,6 +9,31 @@ class KDLanguage:
         self.current_language = "english"  # Default language
         self.translations = {
             
+            "downloading": {
+                "english": "Downloading",
+                "japanese": "ダウンロード中",
+                "korean": "다운로드 중",
+                "chinese-simplified": "下载中"
+            },
+            "completed": {
+                "english": "Completed",
+                "japanese": "完了",
+                "korean": "완료",
+                "chinese-simplified": "已完成"
+            },
+            "failed": {
+                "english": "Failed",
+                "japanese": "失敗",
+                "korean": "실패",
+                "chinese-simplified": "失败"
+            },
+            "auto_rename": {
+                "english": "Auto Rename and sort File name by order",
+                "japanese": "自動リネームとファイル名を順序で並べ替え",
+                "korean": "자동 이름 바꾸기 및 순서별 파일 이름 정렬",
+                "chinese-simplified": "自动重命名并按顺序排序文件名"
+            },
+            
             "download_failed_retrying": {
                 "english": "Download failed for {0}, attempt {1}/{2}: {3}",
                 "japanese": "{0}のダウンロードに失敗しました、試行{1}/{2}：{3}",

@@ -6,9 +6,9 @@ import json
 from urllib.parse import urljoin
 from bs4 import BeautifulSoup
 from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLineEdit, QPushButton, 
-                             QGroupBox, QGridLayout, QProgressBar, QTextEdit, QListWidget, 
-                             QListWidgetItem, QAbstractItemView, QMessageBox, QCheckBox, 
-                             QLabel, QDialog)
+                         QGroupBox, QGridLayout, QProgressBar, QTextEdit, QListWidget, 
+                         QListWidgetItem, QAbstractItemView, QMessageBox, QCheckBox, 
+                         QLabel, QDialog)
 from PyQt6.QtCore import Qt, QThread, pyqtSignal
 from PyQt6.QtGui import QColor, QPixmap
 import qtawesome as qta
@@ -501,7 +501,7 @@ class CreatorDownloadThread(QThread):
     log = pyqtSignal(str, str)
     finished = pyqtSignal()
 
-    def __init__(self, service, creator_id, download_folder, selected_posts, files_to_download, files_to_posts_map, console, other_files_dir, post_titles_map, max_concurrent=20):
+    def __init__(self, service, creator_id, download_folder, selected_posts, files_to_download, files_to_posts_map, console, other_files_dir, post_titles_map, auto_rename_enabled, max_concurrent=20):
         super().__init__()
         self.service = service
         self.creator_id = creator_id
@@ -520,6 +520,8 @@ class CreatorDownloadThread(QThread):
         self.failed_files = {}  # Map file_url to error message
         self.post_titles_map = post_titles_map
         self.creator_name = None
+        self.auto_rename_enabled = auto_rename_enabled
+        self.post_file_counters = {}  # Track file counter per post for auto-rename
 
     def build_post_files_map(self):
         post_files_map = {post_id: [] for post_id in self.selected_posts}
@@ -605,6 +607,23 @@ class CreatorDownloadThread(QThread):
             return
 
         filename = file_url.split('f=')[-1] if 'f=' in file_url else file_url.split('/')[-1].split('?')[0]
+
+        # Apply auto rename if enabled
+        if self.auto_rename_enabled:
+            # Initialize counter for this post if not exists
+            if post_id not in self.post_file_counters:
+                self.post_file_counters[post_id] = 0
+            
+            # Increment counter for this post
+            self.post_file_counters[post_id] += 1
+            
+            # Get file extension
+            file_ext = os.path.splitext(filename)[1]
+            # Get original filename without extension
+            original_name = os.path.splitext(filename)[0]
+            # Create new filename with counter and original name
+            filename = f"{self.post_file_counters[post_id]}_{original_name}{file_ext}"
+        
         full_path = os.path.join(post_folder, filename.replace('/', '_'))
         url_hash = hashlib.md5(file_url.encode()).hexdigest()
 
@@ -926,6 +945,12 @@ class CreatorDownloaderTab(QWidget):
         creator_categories_layout.addStretch()
         creator_options_layout.addLayout(creator_categories_layout)
 
+        # Auto rename checkbox
+        self.creator_auto_rename_check = QCheckBox()
+        self.creator_auto_rename_check.setChecked(True)  # Default to enabled
+        self.creator_auto_rename_check.setStyleSheet("color: white;")
+        creator_options_layout.addWidget(self.creator_auto_rename_check)
+
         self.creator_ext_group = QGroupBox()
         self.creator_ext_group.setStyleSheet("QGroupBox { color: white; }")
         creator_ext_layout = QGridLayout()
@@ -1075,6 +1100,7 @@ class CreatorDownloaderTab(QWidget):
         self.creator_attachments_check.setText(translate("attachments"))
         self.creator_content_check.setText(translate("content_images"))
         self.creator_check_all.setText(translate("check_all"))
+        self.creator_auto_rename_check.setText(translate("auto_rename"))
         
         self.creator_file_progress_label.setText(translate("file_progress", 0))
         self.creator_overall_progress_label.setText(translate("overall_progress", 0, 0, 0, 0))
@@ -1128,7 +1154,7 @@ class CreatorDownloaderTab(QWidget):
         self.validation_thread.finished.connect(self.cleanup_validation_thread)
         self.active_threads.append(self.validation_thread)
         self.validation_thread.start()
-    
+
     def cleanup_validation_thread(self):
         """Clean up the validation thread after it finishes."""
         if self.validation_thread in self.active_threads:
@@ -1259,7 +1285,7 @@ class CreatorDownloaderTab(QWidget):
     def on_post_detection_finished(self, detected_posts):
         self.all_files_map[self.current_creator_url] = detected_posts
         self.all_detected_posts = detected_posts
-        self.start_population_thread(detected_posts)
+        self.start_population_thread(self.all_detected_posts)
 
     def start_population_thread(self, detected_posts):
         self.background_task_label.setText(translate("populating_posts"))
@@ -1404,7 +1430,8 @@ class CreatorDownloaderTab(QWidget):
         max_concurrent = self.parent.settings_tab.get_simultaneous_downloads()
         thread = CreatorDownloadThread(service, creator_id, self.parent.download_folder, 
                                     self.posts_to_download, files_to_download, files_to_posts_map, 
-                                    self.creator_console, self.other_files_dir, self.post_titles_map, max_concurrent)
+                                    self.creator_console, self.other_files_dir, self.post_titles_map, 
+                                    self.creator_auto_rename_check.isChecked(), max_concurrent)
         thread.file_progress.connect(self.update_creator_file_progress)
         thread.file_completed.connect(self.update_file_completion)
         thread.post_completed.connect(self.update_post_completion)
@@ -1637,7 +1664,7 @@ class CreatorDownloaderTab(QWidget):
         self.checkbox_toggle_thread.finished.connect(self.cleanup_checkbox_toggle_thread)
         self.active_threads.append(self.checkbox_toggle_thread)
         self.checkbox_toggle_thread.start()
-    
+
     def cleanup_checkbox_toggle_thread(self):
         """Clean up the checkbox toggle thread after it finishes."""
         if self.checkbox_toggle_thread in self.active_threads:
@@ -1709,7 +1736,7 @@ class CreatorDownloaderTab(QWidget):
             self.active_threads.remove(self.filter_thread)
         self.filter_thread.deleteLater()
         self.filter_thread = None
-                
+            
     def add_list_item(self, text, url, is_checked):
         item = QListWidgetItem()
         item.setData(Qt.UserRole, url)  
@@ -1877,5 +1904,4 @@ class CancellationThread(QThread):
         
         self.log.emit(translate("log_info", "Cancellation process completed"), "INFO")
         if self.is_running:
-            self.finished.emit()   
-            
+            self.finished.emit()
