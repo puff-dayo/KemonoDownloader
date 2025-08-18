@@ -178,6 +178,7 @@ class PostDetectionThread(QThread):
             
             success = False
             response = None
+            likely_last_page = len(all_posts) > 0 and len(all_posts) % page_size != 0
             
             for alt_url in alternative_urls:
                 if not self.is_running:
@@ -200,18 +201,27 @@ class PostDetectionThread(QThread):
                         success = True
                         break
                     else:
-                        self.log.emit(translate("log_debug", f"Endpoint failed: {alt_url} - Status: {alt_response.status_code}"), "DEBUG")
+                        if likely_last_page or len(all_posts) > 0:
+                            self.log.emit(translate("log_debug", f"Endpoint returned {alt_response.status_code} (likely reached end of data): {alt_url}"), "DEBUG")
+                        else:
+                            self.log.emit(translate("log_debug", f"Endpoint failed: {alt_url} - Status: {alt_response.status_code}"), "DEBUG")
                 except requests.RequestException as alt_e:
-                    self.log.emit(translate("log_debug", f"Endpoint error: {alt_url} - {str(alt_e)}"), "DEBUG")
+                    if likely_last_page or len(all_posts) > 0:
+                        self.log.emit(translate("log_debug", f"Endpoint unavailable (likely reached end of data): {alt_url} - {str(alt_e)}"), "DEBUG")
+                    else:
+                        self.log.emit(translate("log_debug", f"Endpoint error: {alt_url} - {str(alt_e)}"), "DEBUG")
             
             if not success:
-                self.log.emit(translate("log_error", f"All API endpoints failed for creator {creator_id}"), "ERROR")
-                break
+                if len(all_posts) > 0:
+                    self.log.emit(translate("log_info", f"Reached last page for creator {creator_id}. Total posts fetched: {len(all_posts)}"), "INFO")
+                    break
+                else:
+                    self.log.emit(translate("log_error", f"All API endpoints failed for creator {creator_id}"), "ERROR")
+                    break
                 
             try:
                 response_text = None
                 
-                # First, try to detect if content is actually gzipped by checking magic number
                 is_gzipped = response.content[:2] == b'\x1f\x8b'
                 
                 if is_gzipped:
@@ -255,6 +265,9 @@ class PostDetectionThread(QThread):
 
             self.log.emit(translate("log_debug", f"Fetched {len(posts_data)} posts at offset {offset}"), "DEBUG")
             
+            if len(posts_data) < page_size and len(posts_data) > 0:
+                self.log.emit(translate("log_info", f"Received {len(posts_data)} posts (less than page size {page_size}), indicating last page reached"), "INFO")
+            
             for post in posts_data:
                 if not isinstance(post, dict):
                     continue
@@ -271,6 +284,11 @@ class PostDetectionThread(QThread):
                 break
 
             all_posts.extend(posts_data)
+            
+            if len(posts_data) < page_size:
+                self.log.emit(translate("log_info", f"Last page reached (received {len(posts_data)} posts, expected {page_size}). Total posts fetched: {len(all_posts)}"), "INFO")
+                break
+                
             offset += page_size
             attempt += 1
             time.sleep(0.5)
