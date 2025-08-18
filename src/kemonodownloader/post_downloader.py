@@ -1066,6 +1066,87 @@ class DownloadThread(QThread):
         self.log.emit(translate("log_info", f"DownloadThread for post {self.post_id} finished"), "INFO")
         self.finished.emit()
 
+class LogsWindow(QDialog):
+    def __init__(self, parent_console, parent=None):
+        super().__init__(parent)
+        self.parent_console = parent_console
+        self.setWindowTitle(translate("full_logs"))
+        self.setModal(False)
+        self.resize(800, 600)
+        self.init_ui()
+        
+    def init_ui(self):
+        layout = QVBoxLayout(self)
+        
+        # Full logs display
+        self.logs_display = QTextEdit()
+        self.logs_display.setReadOnly(True)
+        self.logs_display.setStyleSheet("background: #2A3B5A; border-radius: 5px; padding: 5px; color: white;")
+        layout.addWidget(self.logs_display)
+        
+        # Copy current logs from parent console
+        self.logs_display.setHtml(self.parent_console.toHtml())
+        
+        # Buttons layout
+        buttons_layout = QHBoxLayout()
+        
+        # Clear logs button
+        self.clear_logs_btn = QPushButton(translate("clear_logs"))
+        self.clear_logs_btn.clicked.connect(self.clear_logs)
+        self.clear_logs_btn.setStyleSheet("background: #4A5B7A; padding: 8px; border-radius: 5px; color: white;")
+        buttons_layout.addWidget(self.clear_logs_btn)
+        
+        # Download logs button
+        self.download_logs_btn = QPushButton(translate("download_logs"))
+        self.download_logs_btn.clicked.connect(self.download_logs)
+        self.download_logs_btn.setStyleSheet("background: #4A5B7A; padding: 8px; border-radius: 5px; color: white;")
+        buttons_layout.addWidget(self.download_logs_btn)
+        
+        buttons_layout.addStretch()
+        layout.addLayout(buttons_layout)
+        
+    def update_logs(self):
+        """Update logs display with current parent console content"""
+        self.logs_display.setHtml(self.parent_console.toHtml())
+        
+    def clear_logs(self):
+        """Clear both the logs window and parent console"""
+        self.logs_display.clear()
+        self.parent_console.clear()
+        
+    def download_logs(self):
+        """Download logs as txt file"""
+        from PyQt6.QtWidgets import QFileDialog
+        import os
+        from datetime import datetime
+        
+        # Get plain text content
+        logs_content = self.logs_display.toPlainText()
+        
+        if not logs_content.strip():
+            QMessageBox.information(self, "No Logs", "No logs to download.")
+            return
+            
+        # Generate default filename with timestamp
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        default_filename = f"post_downloader_logs_{timestamp}.txt"
+        
+        # Open file dialog
+        file_path, _ = QFileDialog.getSaveFileName(
+            self,
+            "Save Logs",
+            default_filename,
+            "Text Files (*.txt);;All Files (*)"
+        )
+        
+        if file_path:
+            try:
+                with open(file_path, 'w', encoding='utf-8') as f:
+                    f.write(logs_content)
+                QMessageBox.information(self, "Success", f"Logs saved to:\n{file_path}")
+            except Exception as e:
+                QMessageBox.critical(self, "Error", f"Failed to save logs:\n{str(e)}")
+
 class PostDownloaderTab(QWidget):
     def __init__(self, parent):
         super().__init__()
@@ -1152,7 +1233,7 @@ class PostDownloaderTab(QWidget):
         self.auto_rename_checkbox.setStyleSheet("color: white;")
         left_layout.addWidget(self.auto_rename_checkbox)
 
-        # Buttons layout
+        # Post buttons layout
         post_btn_layout = QHBoxLayout()
         self.post_download_btn = QPushButton(qta.icon('fa5s.download', color='white'), "")
         self.post_download_btn.clicked.connect(self.start_post_download)
@@ -1163,6 +1244,13 @@ class PostDownloaderTab(QWidget):
         self.post_cancel_btn.setStyleSheet("background: #4A5B7A; padding: 8px; border-radius: 5px;")
         self.post_cancel_btn.setEnabled(False)
         post_btn_layout.addWidget(self.post_cancel_btn)
+        
+        self.post_expand_logs_btn = QPushButton(qta.icon('fa5s.expand', color='white'), "")
+        self.post_expand_logs_btn.clicked.connect(self.expand_logs)
+        self.post_expand_logs_btn.setStyleSheet("background: #4A5B7A; padding: 8px; border-radius: 5px;")
+        self.post_expand_logs_btn.setToolTip("Expand Logs")
+        post_btn_layout.addWidget(self.post_expand_logs_btn)
+        
         left_layout.addLayout(post_btn_layout)
 
         left_layout.addStretch()
@@ -1257,6 +1345,9 @@ class PostDownloaderTab(QWidget):
         self.post_download_btn.leaveEvent = lambda e: self.parent.animate_button(self.post_download_btn, False)
         self.post_cancel_btn.enterEvent = lambda e: self.parent.animate_button(self.post_cancel_btn, True)
         self.post_cancel_btn.leaveEvent = lambda e: self.parent.animate_button(self.post_cancel_btn, False)
+        
+        self.post_expand_logs_btn.enterEvent = lambda e: self.parent.animate_button(self.post_expand_logs_btn, True)
+        self.post_expand_logs_btn.leaveEvent = lambda e: self.parent.animate_button(self.post_expand_logs_btn, False)
 
         self.update_ui_text()
 
@@ -1275,6 +1366,7 @@ class PostDownloaderTab(QWidget):
         
         self.post_download_btn.setText(translate("download"))
         self.post_cancel_btn.setText(translate("cancel"))
+        self.post_expand_logs_btn.setText(translate("expand_logs"))
         
         self.post_check_all.setText(translate("check_all"))
         self.download_all_links.setText(translate("download_all_links"))
@@ -2099,6 +2191,19 @@ class PostDownloaderTab(QWidget):
             self.current_preview_url = None
             self.post_view_button.setEnabled(False)
 
+    def expand_logs(self):
+        """Open logs window with full logs display"""
+        if not hasattr(self, 'logs_window') or not self.logs_window.isVisible():
+            self.logs_window = LogsWindow(self.post_console, self)
+            self.logs_window.show()
+        else:
+            self.logs_window.update_logs()
+            self.logs_window.raise_()
+            self.logs_window.activateWindow()
+
     def append_log_to_console(self, message, level="INFO"):
         color = {"INFO": "green", "WARNING": "yellow", "ERROR": "red"}.get(level, "white")
         self.post_console.append(f"<span style='color:{color}'>{message}</span>")
+        
+        if hasattr(self, 'logs_window') and self.logs_window.isVisible():
+            self.logs_window.update_logs()

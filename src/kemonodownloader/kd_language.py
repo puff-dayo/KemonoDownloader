@@ -424,6 +424,31 @@ class KDLanguage:
                 "korean": "중국어 (간체)",
                 "chinese-simplified": "中文 (简体)"
             },
+
+            "expand_logs": {
+                "english": "Expand Logs",
+                "japanese": "ログを展開",
+                "korean": "로그 확장",
+                "chinese-simplified": "展开日志"
+            },
+            "full_logs": {
+                "english": "Full Logs",
+                "japanese": "完全なログ",
+                "korean": "전체 로그",
+                "chinese-simplified": "完整日志"
+            },
+            "clear_logs": {
+                "english": "Clear Logs",
+                "japanese": "ログをクリア",
+                "korean": "로그 지우기",
+                "chinese-simplified": "清除日志"
+            },
+            "download_logs": {
+                "english": "Download Logs",
+                "japanese": "ログをダウンロード",
+                "korean": "로그 다운로드",
+                "chinese-simplified": "下载日志"
+            },
             
             # Confirmation dialogs
             "confirm_settings_change": {

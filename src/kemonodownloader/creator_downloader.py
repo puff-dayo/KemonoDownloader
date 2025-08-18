@@ -938,6 +938,85 @@ class CheckboxToggleThread(QThread):
         self.log.emit(translate("log_debug", f"Checkbox toggle completed: Check ALL = {is_checked}, Affected posts: {len(affected_post_ids)}, Total checked: {len(posts_to_download)}"), "INFO")
         self.finished.emit(self.checked_urls, posts_to_download)
 
+class LogsWindow(QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.parent = parent
+        self.setWindowTitle(translate("full_logs"))
+        self.setModal(False)
+        self.resize(800, 600)
+        self.setStyleSheet("background: #1A2B4A; color: white;")
+        
+        layout = QVBoxLayout(self)
+        
+        # Logs display
+        self.logs_display = QTextEdit()
+        self.logs_display.setReadOnly(True)
+        self.logs_display.setStyleSheet("background: #2A3B5A; border-radius: 5px; padding: 5px;")
+        layout.addWidget(self.logs_display)
+        
+        # Buttons layout
+        buttons_layout = QHBoxLayout()
+        
+        self.clear_logs_btn = QPushButton(translate("clear_logs"))
+        self.clear_logs_btn.clicked.connect(self.clear_logs)
+        self.clear_logs_btn.setStyleSheet("background: #4A5B7A; padding: 8px; border-radius: 5px;")
+        buttons_layout.addWidget(self.clear_logs_btn)
+        
+        self.download_logs_btn = QPushButton(translate("download_logs"))
+        self.download_logs_btn.clicked.connect(self.download_logs)
+        self.download_logs_btn.setStyleSheet("background: #4A5B7A; padding: 8px; border-radius: 5px;")
+        buttons_layout.addWidget(self.download_logs_btn)
+        
+        buttons_layout.addStretch()
+        layout.addLayout(buttons_layout)
+        
+        # Update logs content
+        self.update_logs_content()
+    
+    def update_logs_content(self):
+        """Update the logs display with current console content"""
+        if self.parent and hasattr(self.parent, 'creator_console'):
+            self.logs_display.setHtml(self.parent.creator_console.toHtml())
+    
+    def clear_logs(self):
+        """Clear both the logs window and parent console"""
+        self.logs_display.clear()
+        if self.parent and hasattr(self.parent, 'creator_console'):
+            self.parent.creator_console.clear()
+    
+    def download_logs(self):
+        """Download logs as a txt file"""
+        from PyQt6.QtWidgets import QFileDialog
+        import os
+        from datetime import datetime
+        
+        # Get plain text content (without HTML formatting)
+        logs_content = self.logs_display.toPlainText()
+        
+        if not logs_content.strip():
+            return
+        
+        # Default filename with timestamp
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        default_filename = f"kemono_logs_{timestamp}.txt"
+        
+        # Open file dialog
+        file_path, _ = QFileDialog.getSaveFileName(
+            self,
+            self.windowTitle(),
+            default_filename,
+            "Text Files (*.txt);;All Files (*)"
+        )
+        
+        if file_path:
+            try:
+                with open(file_path, 'w', encoding='utf-8') as f:
+                    f.write(logs_content)
+                self.parent.append_log_to_console(f"Logs saved to: {file_path}", "INFO")
+            except Exception as e:
+                self.parent.append_log_to_console(f"Failed to save logs: {str(e)}", "ERROR")
+
 class CreatorDownloaderTab(QWidget):
     def __init__(self, parent):
         super().__init__()
@@ -1092,6 +1171,13 @@ class CreatorDownloaderTab(QWidget):
         self.creator_cancel_btn.setStyleSheet("background: #4A5B7A; padding: 8px; border-radius: 5px;")
         self.creator_cancel_btn.setEnabled(False)
         creator_btn_layout.addWidget(self.creator_cancel_btn)
+        
+        self.creator_expand_logs_btn = QPushButton(qta.icon('fa5s.expand', color='white'), "")
+        self.creator_expand_logs_btn.clicked.connect(self.expand_logs)
+        self.creator_expand_logs_btn.setStyleSheet("background: #4A5B7A; padding: 8px; border-radius: 5px;")
+        self.creator_expand_logs_btn.setToolTip("Expand Logs")
+        creator_btn_layout.addWidget(self.creator_expand_logs_btn)
+        
         left_layout.addLayout(creator_btn_layout)
 
         left_layout.addStretch()
@@ -1187,6 +1273,7 @@ class CreatorDownloaderTab(QWidget):
         
         self.creator_download_btn.setText(translate("download"))
         self.creator_cancel_btn.setText(translate("cancel"))
+        self.creator_expand_logs_btn.setText(translate("expand_logs"))
         
         self.creator_search_input.setPlaceholderText(translate("search_posts"))
         
@@ -1715,6 +1802,16 @@ class CreatorDownloaderTab(QWidget):
         self.checkbox_toggle_thread = None
         self.validation_thread = None
 
+    def expand_logs(self):
+        """Open the full logs window"""
+        if not hasattr(self, 'logs_window') or not self.logs_window.isVisible():
+            self.logs_window = LogsWindow(self)
+            self.logs_window.show()
+        else:
+            self.logs_window.raise_()
+            self.logs_window.activateWindow()
+            self.logs_window.update_logs_content()
+
     def toggle_check_all(self, state):
         if hasattr(self, 'checkbox_toggle_thread') and self.checkbox_toggle_thread is not None and self.checkbox_toggle_thread.isRunning():
             self.append_log_to_console(translate("log_warning", "Checkbox toggle already in progress. Please wait."), "WARNING")
@@ -1947,6 +2044,9 @@ class CreatorDownloaderTab(QWidget):
     def append_log_to_console(self, message, level="INFO"):
         color = {"INFO": "green", "WARNING": "yellow", "ERROR": "red"}.get(level, "white")
         self.creator_console.append(f"<span style='color:{color}'>{message}</span>")
+        
+        if hasattr(self, 'logs_window') and self.logs_window.isVisible():
+            self.logs_window.update_logs_content()
 
 class CancellationThread(QThread):
     finished = pyqtSignal()
