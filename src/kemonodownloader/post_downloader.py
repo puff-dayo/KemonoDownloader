@@ -40,6 +40,24 @@ accept_language = f"{system_language},en;q=0.9"
 
 ua = UserAgent()
 user_agent = ua.chrome  
+API_BASE = "https://kemono.cr/api/v1"
+
+def get_domain_config(url):
+    """Determine domain configuration based on URL"""
+    if 'coomer.st' in url:
+        return {
+            'domain': 'coomer.st',
+            'base_url': 'https://coomer.st',
+            'api_base': 'https://coomer.st/api/v1',
+            'referer': 'https://coomer.st/'
+        }
+    else:  # Default to kemono.cr
+        return {
+            'domain': 'kemono.cr',
+            'base_url': 'https://kemono.cr',
+            'api_base': 'https://kemono.cr/api/v1',
+            'referer': 'https://kemono.cr/'
+        }
 
 HEADERS = {
     "User-Agent": user_agent,
@@ -50,7 +68,6 @@ HEADERS = {
     "Connection": "keep-alive",
     "Upgrade-Insecure-Requests": "1"
 }
-API_BASE = "https://kemono.cr/api/v1"
 
 class PreviewThread(QThread):
     preview_ready = pyqtSignal(str, object)
@@ -64,6 +81,7 @@ class PreviewThread(QThread):
         self.total_size = 0
         self.downloaded_size = 0
         os.makedirs(self.cache_dir, exist_ok=True)
+        self.domain_config = get_domain_config(url)
 
     def run(self):
         ext = os.path.splitext(self.url.lower())[1]
@@ -498,6 +516,7 @@ class PostDetectionThread(QThread):
         super().__init__()
         self.url = url
         self.is_running = True
+        self.domain_config = get_domain_config(url)
 
     def stop(self):
         self.is_running = False
@@ -506,7 +525,7 @@ class PostDetectionThread(QThread):
     def run(self):
         parts = self.url.split('/')
         service, creator_id, post_id = parts[-5], parts[-3], parts[-1]
-        api_url = f"{API_BASE}/{service}/user/{creator_id}/post/{post_id}"
+        api_url = f"{self.domain_config['api_base']}/{service}/user/{creator_id}/post/{post_id}"
 
         try:
             response = self.make_robust_request(api_url)
@@ -592,7 +611,7 @@ class PostDetectionThread(QThread):
             file_path = post['file']['path']
             file_name = post['file'].get('name', '')
             file_ext = get_effective_extension(file_path, file_name)
-            file_url = urljoin("https://kemono.cr", file_path)
+            file_url = urljoin(self.domain_config['base_url'], file_path)
             if 'f=' not in file_url and file_name:
                 file_url += f"?f={file_name}"
             if file_ext in allowed_extensions:
@@ -604,7 +623,7 @@ class PostDetectionThread(QThread):
                     attachment_path = attachment['path']
                     attachment_name = attachment.get('name', '')
                     attachment_ext = get_effective_extension(attachment_path, attachment_name)
-                    attachment_url = urljoin("https://kemono.cr", attachment_path)
+                    attachment_url = urljoin(self.domain_config['base_url'], attachment_path)
                     if 'f=' not in attachment_url and attachment_name:
                         attachment_url += f"?f={attachment_name}"
                     if attachment_ext in allowed_extensions:
@@ -613,7 +632,7 @@ class PostDetectionThread(QThread):
         if 'content' in post and post['content']:
             soup = BeautifulSoup(post['content'], 'html.parser')
             for img in soup.select('img[src]'):
-                img_url = urljoin("https://kemono.cr", img['src'])
+                img_url = urljoin(self.domain_config['base_url'], img['src'])
                 img_ext = os.path.splitext(img_url)[1].lower()
                 img_name = os.path.basename(img_url)
                 if img_ext in allowed_extensions:
@@ -627,7 +646,7 @@ class FilePreparationThread(QThread):
     log = pyqtSignal(str, str)
     error = pyqtSignal(str)
 
-    def __init__(self, post_ids, all_files_map, post_ext_checks, file_url_map, max_concurrent=10):
+    def __init__(self, post_ids, all_files_map, post_ext_checks, file_url_map, url, max_concurrent=10):
         super().__init__()
         self.post_ids = post_ids
         self.all_files_map = all_files_map
@@ -635,7 +654,8 @@ class FilePreparationThread(QThread):
         self.file_url_map = file_url_map
         self.max_concurrent = max_concurrent
         self.is_running = True
-        self.url = None
+        self.url = url
+        self.domain_config = get_domain_config(url)
 
     def stop(self):
         self.is_running = False
@@ -654,7 +674,7 @@ class FilePreparationThread(QThread):
             file_path = post['file']['path']
             file_name = post['file'].get('name', '')
             file_ext = get_effective_extension(file_path, file_name)
-            file_url = urljoin("https://kemono.cr", file_path)
+            file_url = urljoin(self.domain_config['base_url'], file_path)
             if 'f=' not in file_url and file_name:
                 file_url += f"?f={file_name}"
             self.log.emit(translate("log_debug", f"Checking main file: {file_name} ({file_ext})"), "INFO")
@@ -671,7 +691,7 @@ class FilePreparationThread(QThread):
                     attachment_path = attachment['path']
                     attachment_name = attachment.get('name', '')
                     attachment_ext = get_effective_extension(attachment_path, attachment_name)
-                    attachment_url = urljoin("https://kemono.cr", attachment_path)
+                    attachment_url = urljoin(self.domain_config['base_url'], attachment_path)
                     if 'f=' not in attachment_url and attachment_name:
                         attachment_url += f"?f={attachment_name}"
                     self.log.emit(translate("log_debug", f"Checking attachment: {attachment_name} ({attachment_ext})"), "INFO")
@@ -685,7 +705,7 @@ class FilePreparationThread(QThread):
         if 'content' in post and post['content']:
             soup = BeautifulSoup(post['content'], 'html.parser')
             for img in soup.select('img[src]'):
-                img_url = urljoin("https://kemono.cr", img['src'])
+                img_url = urljoin(self.domain_config['base_url'], img['src'])
                 img_ext = os.path.splitext(img_url)[1].lower() 
                 img_name = os.path.basename(img_url)
                 self.log.emit(translate("log_debug", f"Checking content image: {img_name} ({img_ext})"), "INFO")
@@ -702,7 +722,7 @@ class FilePreparationThread(QThread):
     def fetch_post_data(self, post_id, max_retries=3, retry_delay_seconds=5):
         parts = self.url.split('/')
         service, creator_id = parts[-5], parts[-3]
-        api_url = f"{API_BASE}/{service}/user/{creator_id}/post/{post_id}"
+        api_url = f"{self.domain_config['api_base']}/{service}/user/{creator_id}/post/{post_id}"
         
         for attempt in range(1, max_retries + 1):
             try:
@@ -835,6 +855,7 @@ class DownloadThread(QThread):
     def __init__(self, url, download_folder, selected_files, files_to_posts_map, console, other_files_dir, post_id, max_concurrent=5, auto_rename=False):
         super().__init__()
         self.url = url
+        self.domain_config = get_domain_config(url)
         self.download_folder = download_folder
         self.selected_files = selected_files
         self.files_to_posts_map = files_to_posts_map
@@ -854,11 +875,11 @@ class DownloadThread(QThread):
     def fetch_post_info(self):
         """Fetch post title."""
         parts = self.url.split('/')
-        if len(parts) < 7 or 'kemono.cr' not in self.url:
+        if len(parts) < 7 or self.domain_config['domain'] not in self.url:
             self.log.emit(translate("log_error", "Invalid URL format for fetching post info"), "ERROR")
             return
         service, creator_id, post_id = parts[-5], parts[-3], parts[-1]
-        api_url = f"{API_BASE}/{service}/user/{creator_id}/post/{post_id}"
+        api_url = f"{self.domain_config['api_base']}/{service}/user/{creator_id}/post/{post_id}"
         try:
             response = self.make_robust_request(api_url)
             if response and response.status_code == 200:
@@ -906,7 +927,7 @@ class DownloadThread(QThread):
 
     def extract_service_from_url(self, url):
         parts = url.split('/')
-        if len(parts) >= 5 and 'kemono.cr' in url:
+        if len(parts) >= 5 and self.domain_config['domain'] in url:
             return parts[-5]
         return "unknown_service"
 
@@ -1417,7 +1438,7 @@ class PostDownloaderTab(QWidget):
 
     def check_post_url_validity(self, url):
         parts = url.split('/')
-        if len(parts) < 7 or 'kemono.cr' not in url:
+        if len(parts) < 7 or get_domain_config(url)['domain'] not in url:
             return False
         
         try:
@@ -1429,14 +1450,15 @@ class PostDownloaderTab(QWidget):
                 'Accept-Language': accept_language,
                 'Connection': 'keep-alive',
                 'Upgrade-Insecure-Requests': '1',
-                'Cache-Control': 'max-age=0'
+                'Cache-Control': 'max-age=0',
+                'Referer': get_domain_config(url)['referer']
             }
             
             direct_response = requests.get(url, headers=fallback_headers, timeout=10)
             
             if direct_response.status_code == 200:
                 content = direct_response.text.lower()
-                if 'kemono' in content:
+                if 'kemono' in content or 'coomer' in content:
                     self.append_log_to_console(translate("log_info", translate("url_validated_fallback", url)), "INFO")
                     return True
             
@@ -1580,7 +1602,7 @@ class PostDownloaderTab(QWidget):
     def display_files_for_post(self, url):
         parts = url.split('/')
         service, creator_id, post_id = parts[-5], parts[-3], parts[-1]
-        api_url = f"{API_BASE}/{service}/user/{creator_id}/post/{post_id}"
+        api_url = f"{get_domain_config(url)['api_base']}/{service}/user/{creator_id}/post/{post_id}"
         try:
             response = self.make_robust_request(api_url)
             if not response or response.status_code != 200:
@@ -1634,6 +1656,7 @@ class PostDownloaderTab(QWidget):
 
     def detect_files(self, post, allowed_extensions):
         detected_files = []
+        domain_config = get_domain_config(self.current_post_url)
         
         def get_effective_extension(file_path, file_name):
             name_ext = os.path.splitext(file_name)[1].lower()
@@ -1644,7 +1667,7 @@ class PostDownloaderTab(QWidget):
             file_path = post['file']['path']
             file_name = post['file'].get('name', '')
             file_ext = get_effective_extension(file_path, file_name)
-            file_url = urljoin("https://kemono.cr", file_path)
+            file_url = urljoin(domain_config['base_url'], file_path)
             if 'f=' not in file_url and file_name:
                 file_url += f"?f={file_name}"
             if '.jpg' in allowed_extensions and file_ext in ['.jpg', '.jpeg']:
@@ -1658,7 +1681,7 @@ class PostDownloaderTab(QWidget):
                     attachment_path = attachment['path']
                     attachment_name = attachment.get('name', '')
                     attachment_ext = get_effective_extension(attachment_path, attachment_name)
-                    attachment_url = urljoin("https://kemono.cr", attachment_path)
+                    attachment_url = urljoin(domain_config['base_url'], attachment_path)
                     if 'f=' not in attachment_url and attachment_name:
                         attachment_url += f"?f={attachment_name}"
                     if '.jpg' in allowed_extensions and attachment_ext in ['.jpg', '.jpeg']:
@@ -1669,7 +1692,7 @@ class PostDownloaderTab(QWidget):
         if 'content' in post and post['content']:
             soup = BeautifulSoup(post['content'], 'html.parser')
             for img in soup.select('img[src]'):
-                img_url = urljoin("https://kemono.cr", img['src'])
+                img_url = urljoin(domain_config['base_url'], img['src'])
                 img_ext = os.path.splitext(img_url)[1].lower()
                 img_name = os.path.basename(img_url)
                 if '.jpg' in allowed_extensions and img_ext in ['.jpg', '.jpeg']:
@@ -1798,6 +1821,7 @@ class PostDownloaderTab(QWidget):
             self.all_files_map,
             self.post_filter_checks,
             self.file_url_map,
+            urls[0] if urls else "",
             max_concurrent=5
         )
         self.file_preparation_thread.url = urls[0] if urls else None

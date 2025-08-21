@@ -40,6 +40,24 @@ accept_language = f"{system_language},en;q=0.9"
 ua = UserAgent()
 user_agent = ua.chrome  
 
+def get_domain_config(url):
+    """Determine domain configuration based on URL"""
+    if 'coomer.st' in url:
+        return {
+            'domain': 'coomer.st',
+            'base_url': 'https://coomer.st',
+            'api_base': 'https://coomer.st/api/v1',
+            'referer': 'https://coomer.st/'
+        }
+    else:  # Default to kemono.cr
+        return {
+            'domain': 'kemono.cr',
+            'base_url': 'https://kemono.cr',
+            'api_base': 'https://kemono.cr/api/v1',
+            'referer': 'https://kemono.cr/'
+        }
+
+# Default headers (will be updated per request based on domain)
 HEADERS = {
     "User-Agent": user_agent,
     "Referer": "https://kemono.cr/", 
@@ -143,6 +161,7 @@ class PostDetectionThread(QThread):
         self.url = url
         self.post_titles_map = post_titles_map  # Shared dictionary to store post titles
         self.is_running = True
+        self.domain_config = get_domain_config(url)
 
     def stop(self):
         self.is_running = False
@@ -152,14 +171,14 @@ class PostDetectionThread(QThread):
             return
         self.log.emit(translate("log_info", translate("checking_creator_with_url", self.url)), "INFO")
         parts = self.url.split('/')
-        if len(parts) < 5 or 'kemono.cr' not in self.url or parts[-2] != 'user':
+        if len(parts) < 5 or (self.domain_config['domain'] not in self.url) or parts[-2] != 'user':
             self.error.emit(translate("invalid_url_format"))
             return
         service, creator_id = parts[-3], parts[-1]
 
         self.log.emit(translate("log_debug", translate("parsed_url_service_creator", service, creator_id)), "INFO")
 
-        base_api_url = f"{API_BASE}/{service}/user/{creator_id}"
+        base_api_url = f"{self.domain_config['api_base']}/{service}/user/{creator_id}"
         self.log.emit(translate("log_debug", translate("base_api_url", base_api_url)), "INFO")
 
         all_posts = []
@@ -170,9 +189,9 @@ class PostDetectionThread(QThread):
         attempt = 1
         while attempt <= max_attempts and self.is_running:
             alternative_urls = [
-                f"{API_BASE}/{service}/user/{creator_id}/posts?o={offset}",  # Try with /posts suffix
+                f"{self.domain_config['api_base']}/{service}/user/{creator_id}/posts?o={offset}",  # Try with /posts suffix
                 f"{base_api_url}?o={offset}",  # Original format as fallback
-                f"https://kemono.cr/api/{service}/user/{creator_id}?o={offset}",  # Try without v1
+                f"{self.domain_config['base_url']}/api/{service}/user/{creator_id}?o={offset}",  # Try without v1
                 f"{base_api_url}?offset={offset}&limit={page_size}",  # Try different parameter names
             ]
             
@@ -191,7 +210,8 @@ class PostDetectionThread(QThread):
                     'Accept': 'text/css',
                     'Accept-Language': accept_language,
                     'Connection': 'keep-alive',
-                    'Cache-Control': 'max-age=0'
+                    'Cache-Control': 'max-age=0',
+                    'Referer': self.domain_config['referer']
                 }
                 
                 try:
@@ -303,14 +323,14 @@ class PostDetectionThread(QThread):
                 thumbnail_url = None
                 if 'file' in post and post['file'] and 'path' in post['file']:
                     if post['file']['path'].lower().endswith(('.jpg', '.jpeg', '.png', '.gif')):
-                        thumbnail_url = urljoin("https://kemono.cr", post['file']['path'])
+                        thumbnail_url = urljoin(self.domain_config['base_url'], post['file']['path'])
                 if not thumbnail_url and 'attachments' in post:
                     for attachment in post['attachments']:
                         if isinstance(attachment, dict) and 'path' in attachment and attachment['path'].lower().endswith(('.jpg', '.jpeg', '.png', '.gif')):
-                            thumbnail_url = urljoin("https://kemono.cr", attachment['path'])
+                            thumbnail_url = urljoin(self.domain_config['base_url'], attachment['path'])
                             break
                 if not thumbnail_url and 'file' in post and post['file'] and 'path' in post['file']:
-                    thumbnail_url = urljoin("https://kemono.cr", post['file']['path'])
+                    thumbnail_url = urljoin(self.domain_config['base_url'], post['file']['path'])
                 detected_posts.append((title, (post_id, thumbnail_url)))
 
             self.log.emit(translate("log_info", translate("total_posts_fetched_for_creator", self.url, len(detected_posts))), "INFO")
@@ -384,7 +404,7 @@ class FilePreparationThread(QThread):
     def stop(self):
         self.is_running = False
 
-    def detect_files(self, post, allowed_extensions):
+    def detect_files(self, post, allowed_extensions, domain_config):
         files_to_download = []
         self.log.emit(translate("log_debug", translate("detecting_files_for_post", allowed_extensions)), "INFO")
         
@@ -398,7 +418,7 @@ class FilePreparationThread(QThread):
             file_path = post['file']['path']
             file_name = post['file'].get('name', '')
             file_ext = get_effective_extension(file_path, file_name)
-            file_url = urljoin("https://kemono.cr", file_path)
+            file_url = urljoin(domain_config['base_url'], file_path)
             if 'f=' not in file_url and file_name:
                 file_url += f"?f={file_name}"
             self.log.emit(translate("log_debug", translate("checking_main_file", file_name, file_ext)), "INFO")
@@ -416,7 +436,7 @@ class FilePreparationThread(QThread):
                     attachment_path = attachment['path']
                     attachment_name = attachment.get('name', '')
                     attachment_ext = get_effective_extension(attachment_path, attachment_name)
-                    attachment_url = urljoin("https://kemono.cr", attachment_path)
+                    attachment_url = urljoin(domain_config['base_url'], attachment_path)
                     if 'f=' not in attachment_url and attachment_name:
                         attachment_url += f"?f={attachment_name}"
                     self.log.emit(translate("log_debug", translate("checking_attachment", attachment_name, attachment_ext)), "INFO")
@@ -431,7 +451,7 @@ class FilePreparationThread(QThread):
         if self.creator_content_check and 'content' in post and post['content']:
             soup = BeautifulSoup(post['content'], 'html.parser')
             for img in soup.select('img[src]'):
-                img_url = urljoin("https://kemono.cr", img['src'])
+                img_url = urljoin(domain_config['base_url'], img['src'])
                 img_ext = os.path.splitext(img_url)[1].lower()
                 img_name = os.path.basename(img_url)
                 self.log.emit(translate("log_debug", translate("checking_content_image", img_name, img_ext)), "INFO")
@@ -448,12 +468,15 @@ class FilePreparationThread(QThread):
     def fetch_and_detect_files(self, post_id, creator_url):
         parts = creator_url.split('/')
         service, creator_id = parts[-3], parts[-1]
-        api_url = f"{API_BASE}/{service}/user/{creator_id}/post/{post_id}"
+        domain_config = get_domain_config(creator_url)
+        api_url = f"{domain_config['api_base']}/{service}/user/{creator_id}/post/{post_id}"
         max_retries = 50
         retry_delay_seconds = 5
         for attempt in range(1, max_retries + 1):
             try:
-                response = requests.get(api_url, headers=HEADERS)
+                headers = HEADERS.copy()
+                headers['Referer'] = domain_config['referer']
+                response = requests.get(api_url, headers=headers)
                 if response.status_code != 200:
                     if response.status_code == 429 and attempt < max_retries:
                         self.log.emit(translate("log_warning", translate("rate_limit_hit", api_url, attempt, max_retries)), "WARNING")
@@ -467,7 +490,7 @@ class FilePreparationThread(QThread):
                 post = post_data if isinstance(post_data, dict) and 'post' not in post_data else post_data.get('post', {})
                 self.log.emit(translate("log_debug", translate("post_data_for_id", post_id, json.dumps(post, indent=2))), "INFO")
                 allowed_extensions = [ext.lower() for ext, checkbox in self.creator_ext_checks.items() if checkbox.isChecked()]
-                detected_files = self.detect_files(post, allowed_extensions)
+                detected_files = self.detect_files(post, allowed_extensions, domain_config)
                 files_to_download = [(file_name, file_url) for file_name, file_url in detected_files]
                 return (post_id, files_to_download)
             except Exception as e:
@@ -577,6 +600,15 @@ class CreatorDownloadThread(QThread):
         self.creator_name = None
         self.auto_rename_enabled = auto_rename_enabled
         self.post_file_counters = {}  # Track file counter per post for auto-rename
+        self.domain_config = self._get_domain_config_from_files()
+
+    def _get_domain_config_from_files(self):
+        """Determine domain configuration from the files to download"""
+        if self.files_to_download:
+            first_url = self.files_to_download[0]
+            return get_domain_config(first_url)
+        # Default fallback
+        return get_domain_config("https://kemono.cr/")
 
     def build_post_files_map(self):
         post_files_map = {post_id: [] for post_id in self.selected_posts}
@@ -607,9 +639,11 @@ class CreatorDownloadThread(QThread):
 
     def fetch_creator_and_post_info(self):
         """Fetch creator name and retrieve post titles from post_titles_map."""
-        profile_url = f"{API_BASE}/{self.service}/user/{self.creator_id}/profile"
+        profile_url = f"{self.domain_config['api_base']}/{self.service}/user/{self.creator_id}/profile"
         try:
-            profile_response = requests.get(profile_url, headers=HEADERS, timeout=10)
+            headers = HEADERS.copy()
+            headers['Referer'] = self.domain_config['referer']
+            profile_response = requests.get(profile_url, headers=headers, timeout=10)
             if profile_response.status_code == 200:
                 profile_data = profile_response.json()
                 self.creator_name = sanitize_filename(profile_data.get('name', 'Unknown_Creator'))
@@ -623,9 +657,11 @@ class CreatorDownloadThread(QThread):
         for post_id in self.selected_posts:
             key = (self.service, self.creator_id, post_id)
             if key not in self.post_titles_map:
-                post_url = f"{API_BASE}/{self.service}/user/{self.creator_id}/post/{post_id}"
+                post_url = f"{self.domain_config['api_base']}/{self.service}/user/{self.creator_id}/post/{post_id}"
                 try:
-                    response = requests.get(post_url, headers=HEADERS, timeout=10)
+                    headers = HEADERS.copy()
+                    headers['Referer'] = self.domain_config['referer']
+                    response = requests.get(post_url, headers=headers, timeout=10)
                     if response.status_code == 200:
                         post_data = response.json()
                         title = post_data.get('title', f"Post_{post_id}")
@@ -704,7 +740,9 @@ class CreatorDownloadThread(QThread):
         file_handle = None
         for attempt in range(1, max_retries + 1):
             try:
-                async with session.get(file_url, headers=HEADERS, timeout=ClientTimeout(total=3600)) as response:
+                headers = HEADERS.copy()
+                headers['Referer'] = self.domain_config['referer']
+                async with session.get(file_url, headers=headers, timeout=ClientTimeout(total=3600)) as response:
                     response.raise_for_status()
                     file_size = int(response.headers.get('content-length', 0)) or 1
                     downloaded_size = 0
@@ -859,6 +897,7 @@ class ValidationThread(QThread):
         super().__init__()
         self.url = url
         self.is_running = True
+        self.domain_config = get_domain_config(url)
 
     def stop(self):
         self.is_running = False
@@ -868,7 +907,7 @@ class ValidationThread(QThread):
             return
         
         parts = self.url.split('/')
-        if len(parts) < 5 or 'kemono.cr' not in self.url or parts[-2] != 'user':
+        if len(parts) < 5 or (self.domain_config['domain'] not in self.url) or parts[-2] != 'user':
             self.log.emit(translate("log_error", translate("invalid_url_format_link", self.url)), "ERROR")
             self.result.emit(False)
             return
@@ -885,11 +924,13 @@ class ValidationThread(QThread):
                     'Accept-Language': accept_language,
                     'Connection': 'keep-alive',
                     'Upgrade-Insecure-Requests': '1',
-                    'Cache-Control': 'max-age=0'
+                    'Cache-Control': 'max-age=0',
+                    'Referer': self.domain_config['referer']
                 }
                 
                 direct_response = requests.get(self.url, headers=fallback_headers, timeout=10)
-                if direct_response.status_code == 200 and 'kemono' in direct_response.text.lower():
+                domain_check = self.domain_config['domain'].split('.')[0]  # 'kemono' or 'coomer'
+                if direct_response.status_code == 200 and domain_check in direct_response.text.lower():
                     self.log.emit(translate("log_info", translate("successfully_validated_url", self.url)), "INFO")
                     self.result.emit(True)
                     return
