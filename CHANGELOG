@@ -1,5 +1,12 @@
 # Kemono Downloader Release Notes
 
+## v5.2.0 (22 August 2025)
+**feat: Added domain config support for coomer.st, Refactor logging, and completed translation for help documentation**
+- Refactored creator_downloader.py and post_downloader.py to dynamically select API endpoints, referers, and base URLs based on the input URL's domain (kemono.cr or coomer.st).
+- Replaced all direct string formatting in log messages with translation keys and parameterized calls to `translate()` throughout creator_downloader.py. Added corresponding translation keys and multi-language support for all log messages in kd_language.py.
+- Added Simplified Chinese translations for all help/manual sections in kd_language.py
+- Changed all English, Japanese, and Korean translation strings to reference Kemono.cr instead of Kemono.su, including URLs and descriptive text.
+
 ## v5.1.0 (20 August 2025)
 **feat: Enhanced last page detection, expanded logging capabilities, and a new feature to open directories**
 - Enhanced tracking to accurately detect the last page based on previous fetches, eliminating confusing "failed" messages.
