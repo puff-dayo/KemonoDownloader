@@ -1,5 +1,9 @@
 # Kemono Downloader Release Notes
 
+## v5.3.0 (28 August 2025)
+**feat: Add .webp support for image previews and filters**
+- Extended image preview, detection, and filter logic in creator_downloader.py and post_downloader.py to include .webp files alongside existing image formats.
+
 ## v5.2.0 (22 August 2025)
 **feat: Added domain config support for coomer.st, Refactor logging, and completed translation for help documentation**
 - Refactored creator_downloader.py and post_downloader.py to dynamically select API endpoints, referers, and base URLs based on the input URL's domain (kemono.cr or coomer.st).
