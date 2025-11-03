@@ -1,5 +1,10 @@
 # Kemono Downloader Release Notes
 
+## v5.5.0 (3 November 2025)
+**feat: Added performance improvements and error fixes**
+- [#45](https://github.com/VoxDroid/KemonoDownloader/pull/45) Performance improvements for UI elements and connection optimizations
+- [#49] (https://github.com/VoxDroid/KemonoDownloader/pull/49) Improvements for edge cases on file completion handling and error fix for filter thread
+
 ## v5.4.0 (10 September 2025)
 **feat: Added customizable retry count settings, fix thread settings, and improved download handling**
 - [#39](https://github.com/VoxDroid/KemonoDownloader/pull/39) Add home folder permissions for Flatpak

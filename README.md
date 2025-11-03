@@ -40,7 +40,7 @@
     <img src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey" alt="Platforms">
   </a>
   <a href="https://github.com/VoxDroid/KemonoDownloader/releases">
-    <img src="https://img.shields.io/badge/version-v5.4.0-brightgreen" alt="Version">
+    <img src="https://img.shields.io/badge/version-v5.5.0-brightgreen" alt="Version">
   </a>
   <a>
     <img src="https://img.shields.io/github/v/release/VoxDroid/KemonoDownloader?label=Latest%20Release" alt="Latest Release">
@@ -311,6 +311,12 @@ We’re incredibly grateful to our amazing contributors who have helped shape **
 <p align="left">
   <a href="https://github.com/VoxDroid">
     <img src="https://github.com/VoxDroid.png" width="60px" style="border-radius: 50%;"/>
+  </a>
+  <a href="https://github.com/jitsuCM">
+    <img src="https://github.com/jitsuCM.png" width="60px" style="border-radius: 50%;"/>
+  </a>
+  <a href="https://github.com/limdingwen">
+    <img src="https://github.com/limdingwen.png" width="60px" style="border-radius: 50%;"/>
   </a>
   <a href="https://github.com/detached64">
     <img src="https://github.com/detached64.png" width="60px" style="border-radius: 50%;"/>
