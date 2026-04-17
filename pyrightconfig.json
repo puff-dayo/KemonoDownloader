@@ -1,0 +1,15 @@
+{
+  "include": [
+    "src"
+  ],
+  "exclude": [
+    "tests"
+  ],
+  "reportMissingImports": false,
+  "reportMissingTypeStubs": false,
+  "reportOptionalMemberAccess": false,
+  "reportAttributeAccessIssue": false,
+  "reportArgumentType": false,
+  "reportGeneralTypeIssues": false,
+  "reportIncompatibleMethodOverride": false
+}

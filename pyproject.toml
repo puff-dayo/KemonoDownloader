@@ -1,7 +1,7 @@
 [tool.briefcase]
 project_name = "Kemono Downloader"
 bundle = "com.voxdroid"
-version = "5.5.1"
+version = "5.10.0"
 url = "https://github.com/VoxDroid/KemonoDownloader"
 license.file = "LICENSE"
 author = "VoxDroid"
@@ -9,8 +9,8 @@ author_email = "izeno.contact@gmail.com"
 
 [tool.briefcase.app.kemonodownloader]
 formal_name = "KemonoDownloader"
-description = "A cross-platform Python app built with PyQt6 to download posts and creator content from Kemono.cr."
-long_description = """A cross-platform Python app built with PyQt6 to download posts and creator content from Kemono.cr. Supports concurrent downloads, file deduplication, and customizable settings."""
+description = "A cross-platform Python app built with PyQt6 to download posts and creator content from Kemono.cr and Coomer.st."
+long_description = """A cross-platform Python app built with PyQt6 to download posts and creator content from Kemono.cr and Coomer.st. Supports concurrent downloads, file deduplication, and customizable settings."""
 signing_identity = ""
 icon = "assets/icons/KemonoDownloader"  
 
@@ -25,18 +25,40 @@ test_sources = [
 requires = [
     "pyqt6",
     "requests",
-    "beautifulsoup4", 
+    "beautifulsoup4",
     "qtawesome",
     "packaging",
     "pillow",
     "fake-useragent",
     "aiohttp",
-    "asyncio"
+    "PySocks",
 ]
 
 test_requires = [
     "pytest",
+    "types-requests",
+    "pytest-qt",
 ]
+
+[tool.mypy]
+files = ["src"]
+strict = false
+ignore_missing_imports = true
+disallow_untyped_calls = false
+disallow_untyped_defs = false
+
+[[tool.mypy.overrides]]
+module = "requests"
+ignore_missing_imports = true
+
+[tool.isort]
+profile = "black"
+line_length = 88
+src_paths = ["src"]
+known_first_party = "kemonodownloader"
+include_trailing_comma = true
+combine_as_imports = true
+force_grid_wrap = 0
 
 [tool.briefcase.app.kemonodownloader.macOS]
 universal_build = false
@@ -50,6 +72,16 @@ requires = [
 
 [tool.briefcase.app.kemonodownloader.linux.system.debian]
 system_requires = [
+    "libegl1",
+    "libgl1-mesa-dri",
+    "libglx-mesa0",
+    "libx11-6",
+    "libxkbcommon0",
+    "libxcb-xinerama0",
+    "libpulse0",
+    "libpulse-mainloop-glib0",
+    "libasound2t64",
+    "mesa-utils",
 ]
 
 system_runtime_requires = [
@@ -90,6 +122,8 @@ finish_arg."filesystem=home" = true
 flatpak_runtime = "org.kde.Platform"
 flatpak_runtime_version = "6.7"
 flatpak_sdk = "org.kde.Sdk"
+flatpak_base = "com.riverbankcomputing.PyQt.BaseApp"
+flatpak_base_version = "6.7"
 
 [tool.briefcase.app.kemonodownloader.windows]
 requires = [
@@ -105,4 +139,9 @@ supported = false
 # Web deployments
 [tool.briefcase.app.kemonodownloader.web]
 supported = false
+
+[tool.pytest.ini_options]
+filterwarnings = [
+    "ignore:urllib3 v2 only supports OpenSSL 1\\.1\\.1\\+, currently the 'ssl' module is compiled with 'LibreSSL.*:Warning",
+]
 

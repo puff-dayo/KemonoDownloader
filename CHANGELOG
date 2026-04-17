@@ -1,5 +1,91 @@
 # Kemono Downloader Release Notes
 
+## v5.10.0 (10 February 2026)
+**feat: Fast Mode, SQLite hash storage, and customizable font settings**
+
+- Add file size validation to HashDB for corruption detection
+  Adds a `file_size` column to the SQLite hash database schema. When a file is successfully downloaded, its actual size on disk is now stored alongside the hash. On subsequent download attempts, the stored file size is compared against the existing file's size before performing the more expensive MD5 hash check. If a size mismatch is detected (indicating corruption or incomplete download), the file is automatically re-downloaded. Includes automatic schema migration for existing databases (ALTER TABLE) and backward compatibility for legacy JSON-migrated entries (default file_size of 0). Adds 7 new unit tests covering file_size storage, retrieval, corruption detection, legacy migration, and old-DB schema migration.
+
+- Fix progress bars to accurately reflect download progress
+  Resolves multiple issues causing progress bars to not reflect actual download state:
+  - **Post Downloader**: Added `bool` success flag to `file_completed` signal (now `pyqtSignal(int, str, bool)`), matching Creator Downloader's existing pattern. Failed files now emit `file_completed(index, url, False)` instead of silently returning, ensuring they are counted in progress.
+  - **Post Downloader**: Removed premature `file_completed` emission from inside the chunk download loop (was firing at progress == 100 before size validation completed).
+  - **Both Downloaders**: Overall progress bar now calculates percentage as `(completed + failed) / total` instead of `completed / total`, so failed files no longer stall the progress bar.
+  - **Post Downloader**: Added `failed_files` tracking set to the UI class with proper clearing alongside `completed_files` at all reset points.
+  - **Post Downloader**: Download completion check now uses `completed + failed >= total` instead of `completed == total`.
+
+- Add Fast Mode to Post Downloader and Creator Downloader
+  Introduces a Fast Mode toggle (with qtawesome bolt icon) to both downloader tabs. When enabled, Fast Mode automatically selects all download categories, locks manual options to prevent accidental changes, and reveals a batch URL input area for pasting multiple URLs at once (one per line). Completed items are automatically removed from the queue. An info button (ℹ) explains the feature in a dialog. Includes full translations for all four languages and new unit tests.
+
+- Fix Creator Downloader fast mode batch download
+  In fast mode, pressing Download now auto-detects and downloads all posts for each queued creator sequentially instead of requiring manual post selection. Uses a pipeline of `_fast_mode_process_next()` → PostDetectionThread → `_fast_mode_auto_download()` → `prepare_files_for_download()` to process each creator URL and advance to the next on completion.
+
+- Lock UI controls during active downloads
+  All UI elements (inputs, checkboxes, buttons, queue lists, pagination, other tabs, and settings tab) are disabled during a download in both Post and Creator downloader tabs. Only the Cancel button and Expand Logs remain enabled. New `set_downloading_ui_state()` method in both tabs provides comprehensive lock/unlock behavior.
+
+- Fix Expand Logs window freezing
+  Both Post and Creator downloader LogsWindow dialogs now use QTimer-based batched updates (500ms interval) instead of synchronous HTML copying on every log entry, preventing UI freezes during heavy download logging.
+
+- Migrate file deduplication from JSON to SQLite
+  Replaces the `file_hashes.json` flat-file backend with a new `hash_db.py` module backed by SQLite (WAL mode, thread-safe). The `HashDB` class provides `has()`, `add()`, `remove()`, and `all_hashes()` methods. Existing JSON hash files are automatically migrated on first access. Improves performance and reliability for large hash sets. Includes 16 unit tests covering CRUD, migration, and thread safety.
+
+- Add font settings to the Settings tab
+  Introduces a new Font Settings group in the settings UI, allowing users to switch the application-wide font between JetBrains Mono (default) and Poppins. Fonts are bundled as TTF files (Regular, Bold, Medium weights) and loaded at startup via QFontDatabase. The selected font is persisted via QSettings and applied across the entire application, including the intro screen, help tab, and browser extension tab. Adds `font_changed` signal to SettingsTab, dynamic `_get_font_family()` helpers in HelpTab and ExtensionTab, recursive font propagation in `KemonoDownloader.apply_font()`, and translations for the font UI in all four languages (English, Japanese, Korean, Chinese-Simplified). Includes 39 new unit tests covering defaults, combo box, signal emission, dialog messages, reset, bundled files, translations, QSettings persistence, and UI elements.
+
+- **fix:** Replace `locale.getlocale(locale.LC_ALL)` with `locale.getlocale(locale.LC_CTYPE)` in downloader modules to prevent `TypeError` on Python 3.14/CachyOS; ensures locale detection works across all OSes and Python versions.
+
+- Include PyQt BaseApp in Flatpak config to provide `libgssapi_krb5.so.2` and prevent runtime crashes
+
+
+## v5.9.0 (09 February 2026)
+**feat: Creator filename/folder customization, browser extension, and misc fixes**
+- Add creator filename/folder customization
+  Introduce customizable filename templates and folder strategies for the Creator downloader. Added SettingsTab options and persistence for `creator_filename_template` and `creator_folder_strategy`, UI widgets (preset templates, editable custom template, help button, folder strategy combo) and translated labels in `kd_language`. Implemented `generate_filename_and_folder` and `get_desc_folder_for_post` in `CreatorDownloadThread` to build sanitized filenames and target folders (`per_post` / `single_folder` / `by_file_type`), support auto-rename counters, avoid duplicating creator folder segments, and write per-post description files (`desc_{post_id}.txt`) into appropriate folders. Added top-level exception protection and logging in download threads for more robust error handling. Added faulthandler enable in `tests/conftest.py` and multiple unit tests covering templates, folder strategies, UI behavior, and thread safety. Also updated `.gitignore` (add `.briefcase`) and extended settings confirmation/applied dialogs to include the new options.
+
+- Add initial Kemono Downloader browser extension
+  Introduce a standalone browser extension for downloading content from Kemono and Coomer sites. Includes background script for downloads and CORS handling, content script for UI and post parsing, manifest, assets, and documentation.
+
+- Add browser extension tab and documentation
+  Introduces a new 'Browser Extension' tab in the application, providing users with information and instructions for the standalone browser extension. Updates the README with a detailed section on the browser extension, and adds relevant translations and UI logic to support the new tab.
+
+- Improve file progress display and direct downloads of the browser extension
+  Enhanced progress messages in the background script to include file index and total, improving clarity during multi-file downloads. Added filename truncation for better UI in content script, and switched to direct anchor-based downloads for ZIP and text files to improve compatibility, especially in incognito mode. Updated manifest with new version, author, and homepage.
+
+- Ensure boolean type for Tor button state checks
+  Wrapped `tor_exists` in `bool()` when setting enabled state for test and start Tor buttons to ensure correct type is used. This improves code clarity and prevents potential issues with non-boolean values.
+
+- Update CI to use libasound2t64 on Ubuntu
+  Replaces `libasound2` with `libasound2t64` in the list of packages installed on Ubuntu in the CI workflow. This ensures compatibility with updated package naming conventions.
+
+- Update dependencies and Debian system requirements
+  Added `types-requests` to test requirements and several new Debian system packages under `system_requires` for better compatibility. Removed `asyncio` from the main requirements list.
+
+- Improve Tor auto-detection and fix image preview loading
+  Enhanced Tor executable auto-detection to search app-local directories before system locations, including walking subfolders for tor binaries. Fixed image preview loading by wrapping downloaded data in `QByteArray` for `QPixmap`. Added type stubs for `fake_useragent` and `qtawesome`. Updated tests to cover new Tor detection logic.
+
+- Improve API fetch robustness and manifest compatibility
+  Enhances the extension's ability to fetch post data by adding fallback parsing, background fetches with custom headers, and improved error handling for sites with non-standard API responses or authentication requirements. Updates the manifest to use Manifest V2 for cross-browser compatibility and documents MV2/MV3 differences and troubleshooting steps in the README.
+
+## v5.8.0 (07 January 2025)
+**feat: Enhanced download capabilities, Tor compatibility, and UI improvements**
+- Fix Tor startup issues on Linux and cross-platform compatibility. Create temporary torrc file to avoid system config conflicts on Linux. Use --torc-file argument for clean Tor initialization.
+- Add FLAC file support to downloader and preview. This commit adds support for the FLAC audio file format across the creator and post downloader modules. FLAC files can now be detected, previewed, and filtered using the UI checkboxes.
+- Add option to download post text as desc.txt. Introduces a checkbox in both creator and post downloaders to enable downloading post text content as desc.txt. Implements logic to fetch, parse, and save post descriptions, with translations and logging for success or failure. Updates language file with new translation keys.
+- Enable multi-selection and bulk actions in post/file lists. Updated both CreatorDownloaderTab and PostDownloaderTab to support extended selection in their respective QListWidgets. Checkbox toggling and item highlighting now apply to all selected items, allowing for bulk operations. Refactored selection handling and removed single-item click handlers in favor of selection change events.
+- Improve URL parsing and query handling for creator downloads. Enhanced URL parsing logic to robustly extract service and creator IDs, including handling of query parameters such as offset and search queries. Added support for single-page requests and improved error handling for malformed URLs. Updated related methods to consistently clean extracted values and handle unexpected URL structures.
+
+## v5.7.0 (28 December 2025)
+**feat: Add proxy and Tor support to settings and downloads, and localize log messages in post_downloader.py**
+- Introduces proxy configuration (custom and Tor) in the settings UI, including Tor process management, auto-detection, and testing. Updates language strings for proxy/Tor options and confirmation dialogs. Refactors download logic to use requests with proxy support, and ensures proxy settings are respected throughout the downloader. Adds PySocks to requirements for SOCKS proxy support.
+- Replaced hardcoded log and tooltip strings in post_downloader.py with calls to the translation system, using new keys added to kd_language.py for improved localization.
+
+## v5.6.0 (23 December 2025)
+**feat: Enhanced UI features, URL normalization, and import functionality**
+- Added a new button to import creator/posts URLs from a .txt file
+- Normalize URLs by stripping trailing slashes. Consistently remove trailing slashes from URLs in creator_downloader.py and post_downloader.py to prevent duplicate queue entries and ensure uniform URL handling
+- Add post list pagination and global check-all to UI. Implements pagination controls for the creator post list, allowing users to navigate posts in pages and improving performance with large post sets. Adds a new 'Check ALL (All)' checkbox to select/deselect all posts across all pages, and updates the UI and language files to support these features. Also improves post fetching, incremental UI updates, and error handling for post detection and cancellation.
+- Redesign intro screen with app image and footer. Refactored the IntroScreen layout to feature a prominent app image and version label, moved the app title, developer, and GitHub link to a smaller footer, and adjusted spacing for a cleaner appearance
+
 ## v5.5.1 (3 November 2025)
 **feat: Fix and restored download completion for creator downloader**
 - Fixed download completion to trigger finish on every posts downloaded.

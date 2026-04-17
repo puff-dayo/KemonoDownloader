@@ -1,4 +1,4 @@
-<h1 align="center">Kemono.cr Downloader</h1>
+<h1 align="center">KemonoDownloader</h1>
 
 <div align="center">
   <img src="https://raw.githubusercontent.com/VoxDroid/KemonoDownloader/refs/heads/main/assets/img/KemonoDownloader.png" alt="Kemono Downloader" width="600"/>
@@ -40,7 +40,7 @@
     <img src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey" alt="Platforms">
   </a>
   <a href="https://github.com/VoxDroid/KemonoDownloader/releases">
-    <img src="https://img.shields.io/badge/version-v5.5.1-brightgreen" alt="Version">
+    <img src="https://img.shields.io/badge/version-v5.10.0-brightgreen" alt="Version">
   </a>
   <a>
     <img src="https://img.shields.io/github/v/release/VoxDroid/KemonoDownloader?label=Latest%20Release" alt="Latest Release">
@@ -87,45 +87,46 @@
 
 <hr style="border: 1px dashed #4A6B9A; margin: 20px 0;">
 
-Welcome to **Kemono Downloader**, a versatile Python-based desktop application built with PyQt6, designed to download content from [Kemono.cr](https://kemono.cr). This tool enables users to archive individual posts or entire creator profiles from services like Patreon, Fanbox, and more, supporting a wide range of file types with customizable settings and advanced features.
+Welcome to **$\color{#546e7a}{\sf{\text{KemonoDownloader}}}$**, a versatile Python-based desktop application built with PyQt6, designed to download content from [Kemono.cr](https://kemono.cr) and [Coomer.st](https://coomer.st). This tool enables users to archive individual posts or entire creator profiles from services like Patreon, Fanbox, and more, supporting a wide range of file types with customizable settings and advanced features.
 
-## Important Notices
+## $\color{#546e7a}{\sf{\text{Important Notices}}}$ <a name="important-notices"></a>
 
-### Disclaimer
+### $\color{#90a4ae}{\sf{\text{Disclaimer}}}$ <a name="disclaimer"></a>
 
-KemonoDownloader is a tool designed for personal and educational use only, to assist users in downloading content from Kemono.cr. The maintainers of this project **do not condone or support the unauthorized distribution of copyrighted material**. Users are solely responsible for ensuring they have the legal right to access and download content from Kemono.cr, and for complying with all applicable laws, as well as the terms of service of the original platforms from which the content originates (e.g., Patreon, Pixiv Fanbox, Gumroad).
+KemonoDownloader is a tool designed for personal and educational use only, to assist users in downloading content from Kemono.cr and Coomer.st. The maintainers of this project **do not condone or support the unauthorized distribution of copyrighted material**. Users are solely responsible for ensuring they have the legal right to access and download content from Kemono.cr and Coomer.st, and for complying with all applicable laws, as well as the terms of service of the original platforms from which the content originates (e.g., Patreon, Pixiv Fanbox, Gumroad).
 
 **Misuse of this tool to infringe on creators’ rights, violate copyright laws, or breach terms of service is strictly prohibited.** The maintainers are not liable for any misuse of KemonoDownloader or any consequences arising from its use, including but not limited to legal action, financial loss, or damage to third parties.
 
-### Ethical Use Guidelines
+### $\color{#90a4ae}{\sf{\text{Ethical Use Guidelines}}}$ <a name="ethical-use-guidelines"></a>
 
-KemonoDownloader interacts with content from Kemono.cr, which may include material originally posted on paywalled platforms like Patreon, Pixiv Fanbox, and Gumroad. Many creators on these platforms rely on paid subscriptions for their livelihood. Downloading and redistributing their content without permission can harm their ability to continue creating.
+KemonoDownloader interacts with content from Kemono.cr and Coomer.st, which may include material originally posted on paywalled platforms like Patreon, Pixiv Fanbox, and Gumroad. Many creators on these platforms rely on paid subscriptions for their livelihood. Downloading and redistributing their content without permission can harm their ability to continue creating.
 
 We strongly encourage users to:
 - Use KemonoDownloader responsibly and only for content you have the legal right to access.
 - Support creators directly by subscribing to their official channels on platforms like Patreon, Pixiv Fanbox, or Gumroad.
 - Avoid redistributing downloaded content, as this may violate copyright laws and harm creators.
 
-### Risks and Limitations
+### $\color{#90a4ae}{\sf{\text{Risks and Limitations}}}$ <a name="risks-and-limitations"></a>
 
-- **Legal Risks**: Downloading content from Kemono.cr may violate copyright laws or the terms of service of the original platforms. Users assume all legal risks associated with using this tool.
-- **Dependency on Kemono.cr**: KemonoDownloader relies on Kemono.cr, which has a history of inconsistent updates and downtime. If Kemono.cr becomes unavailable, this tool will lose its functionality.
-- **Rate Limits and Errors**: Kemono.cr may impose rate limits or other restrictions that affect download performance. The maintainers cannot guarantee uninterrupted access to Kemono.su’s content.
+- **Legal Risks**: Downloading content from Kemono.cr and Coomer.st may violate copyright laws or the terms of service of the original platforms. Users assume all legal risks associated with using this tool.
+- **Dependency on Kemono.cr and Coomer.st**: KemonoDownloader relies on Kemono.cr and Coomer.st, which have a history of inconsistent updates and downtime. If these sites become unavailable, this tool will lose its functionality.
+- **Rate Limits and Errors**: Kemono.cr and Coomer.st may impose rate limits or other restrictions that affect download performance. The maintainers cannot guarantee uninterrupted access to these sites' content.
 
-## Community Standards
+## $\color{#546e7a}{\sf{\text{Community Standards}}}$ <a name="community-standards"></a>
 
 We are committed to fostering a welcoming and respectful community around KemonoDownloader. Please read our [Code of Conduct](CODE_OF_CONDUCT.md) and [Security Policy](SECURITY.md) to understand the standards we expect from all contributors and users. Key points include:
 - Respecting the intellectual property rights of creators.
 - Refraining from using KemonoDownloader to engage in illegal activities, such as unauthorized distribution of copyrighted material.
 - Reporting any violations of the Code of Conduct or security issues to the maintainers via [izeno.contact@gmail.com](mailto:izeno.contact@gmail.com) or by opening a private issue labeled "Code of Conduct Violation" or "Security Violation."
 
-## Table of Contents
+## $\color{#546e7a}{\sf{\text{Table of Contents}}}$ <a name="table-of-contents"></a>
 - [Important Notices](#important-notices)
   - [Disclaimer](#disclaimer)
   - [Ethical Use Guidelines](#ethical-use-guidelines)
   - [Risks and Limitations](#risks-and-limitations)
 - [Community Standards](#community-standards)
 - [Features](#features)
+- [Browser Extension](#browser-extension)
 - [Installation](#installation)
 - [Usage](#usage)
   - [Getting Started](#getting-started)
@@ -145,26 +146,147 @@ We are committed to fostering a welcoming and respectful community around Kemono
   - [Project Star Statistics](#project-star-statistics)
   - [Star History](#star-history)
 
-## Features
-- **Post Downloading**: Easily download files from specific Kemono.cr posts using their URLs.
-- **Creator Archiving**: Bulk download all posts and files from a creator's profile with a single click.
-- **File Type Support**: Handle images (JPG, PNG, GIF), videos (MP4), archives (ZIP, 7Z), PDFs, and more.
-- **Concurrent Downloads**: Adjust the number of simultaneous downloads (1-10) for optimal performance.
-- **File Deduplication**: Prevent redundant downloads using URL hashes.
-- **Image Previews**: Preview images before downloading to verify content.
-- **Detailed Logging**: Track progress and troubleshoot issues with an in-app console.
-- **Cross-Platform UI**: Built with PyQt6 for a modern, intuitive interface compatible with multiple operating systems.
-- **Media Playback**: Preview videos and GIFs with built-in playback controls (play, pause, seek, volume).
-- **Multilingual Support**: Switch between English, Japanese, Korean and Simplified Chinese languages dynamically.
-- **Automatic Updates**: Check for new versions on startup with optional notifications.
+## $\color{#546e7a}{\sf{\text{Features}}}$ <a name="features"></a>
 
-## Installation
+KemonoDownloader offers a comprehensive set of features designed to efficiently download and manage content from Kemono.cr and Coomer.st. Below is a detailed breakdown organized by category.
+
+### $\color{#90a4ae}{\sf{\text{Downloading Capabilities}}}$
+
+| Feature | Description |
+|---------|-------------|
+| **Post Downloader** | Download files from individual posts using direct URLs. Supports previewing, filtering by file type, and batch selection. |
+| **Creator Downloader** | Bulk download entire creator profiles or selected posts. Configurable options for main files, attachments, and content images. |
+| **File Type Support** | Handles images (JPG, PNG, GIF, WebP), videos (MP4, AVI, MOV), archives (ZIP, 7Z, RAR), documents (PDF, TXT), audio (MP3, WAV), and more. |
+| **URL Import** | Import multiple creator URLs from .txt files for batch processing. |
+| **Fast Mode** | One-click toggle that selects all file categories, locks options, and enables batch URL input for rapid bulk downloading. In Creator Downloader, auto-detects and downloads all posts for each queued creator sequentially. |
+| **Download UI Lock** | All controls are disabled during active downloads (except Cancel and Expand Logs) to prevent accidental changes. |
+
+### $\color{#90a4ae}{\sf{\text{Performance and Reliability}}}$
+
+| Feature | Description |
+|---------|-------------|
+| **Concurrent Downloads** | Adjustable parallel downloads (1-10 threads) for optimal performance. |
+| **Retry Mechanisms** | Configurable retries for posts fetching, data retrieval, file downloads, and API requests. |
+| **File Deduplication** | Prevents redundant downloads using SQLite-backed URL hashing (auto-migrates from legacy JSON). |
+| **Connection Pooling** | Efficient HTTP connection management with gzip compression support. |
+
+### $\color{#90a4ae}{\sf{\text{User Interface and Experience}}}$
+
+| Feature | Description |
+|---------|-------------|
+| **Cross-Platform GUI** | Modern PyQt6 interface for Windows, macOS, and Linux. |
+| **Multilingual Support** | Dynamic language switching between English, Japanese, Korean, and Simplified Chinese. |
+| **Media Playback** | Built-in video and GIF preview with play/pause/seek/volume controls. |
+| **Real-time Logging** | In-app console with progress bars and detailed status updates. |
+
+### $\color{#90a4ae}{\sf{\text{Advanced Features}}}$
+
+| Feature | Description |
+|---------|-------------|
+| **Proxy Support** | Tor integration and custom proxy configuration for privacy. |
+| **Automatic Updates** | Optional version checking with download notifications. |
+| **Organized Storage** | Automatic directory creation (Downloads, Cache, Other Files) with customizable paths. |
+| **User Agent Rotation** | Realistic browser user agents to avoid detection. |
+
+### $\color{#90a4ae}{\sf{\text{Settings and Customization}}}$
+
+#### $\color{#90a4ae}{\sf{\text{Download Settings}}}$
+| Setting | Description | Default | Range |
+|---------|-------------|---------|-------|
+| Simultaneous Downloads | Number of parallel threads | 5 | 1-10 |
+| Creator Posts Max Attempts | Max attempts to fetch posts | 200 | 1-1000 |
+| Post Data Max Retries | Retries for post data | 7 | 1-50 |
+| File Download Max Retries | Retries for files | 50 | 1-100 |
+| API Request Max Retries | Retries for API calls | 3 | 1-10 |
+
+#### $\color{#90a4ae}{\sf{\text{Folder Settings}}}$
+- **Base Directory**: Custom root path for downloads
+- **Folder Name**: Configurable app data folder name
+- **Platform Defaults**: Auto-detection of appropriate directories per OS
+
+#### $\color{#90a4ae}{\sf{\text{Font Settings}}}$
+| Setting | Description | Default | Options |
+|---------|-------------|---------|---------|
+| Font | Application-wide font family (bundled Google Fonts) | JetBrains Mono | JetBrains Mono, Poppins |
+
+### $\color{#90a4ae}{\sf{\text{Help and Documentation}}}$
+
+| Feature | Description |
+|---------|-------------|
+| **Embedded Help** | Comprehensive in-app manual with usage guides |
+| **Contextual Guidance** | Step-by-step instructions for each feature |
+| **Troubleshooting** | Built-in solutions for common issues |
+
+### $\color{#90a4ae}{\sf{\text{Platform Support}}}$
+
+| Platform | Support Details |
+|----------|-----------------|
+| **Windows** | Native .exe builds, portable and installer options |
+| **macOS** | Universal binaries for Intel and Apple Silicon |
+| **Linux** | Packages for Arch, Fedora, Ubuntu, and other distributions |
+
+### $\color{#90a4ae}{\sf{\text{Security and Privacy}}}$
+
+| Feature | Description |
+|---------|-------------|
+| **Local Storage** | All data stored locally with user-specified paths |
+| **No Data Collection** | No transmission of user data or download history |
+| **HTTPS Only** | Secure connections to Kemono.cr and Coomer.st APIs |
+| **Ethical Design** | Promotes legal and responsible content access |
+
+## $\color{#546e7a}{\sf{\text{Browser Extension}}}$ <a name="browser-extension"></a>
+
+KemonoDownloader also includes a **standalone browser extension** that provides an alternative way to download content directly from your browser. This extension works independently from the desktop application and offers a streamlined experience for individual post downloads.
+
+### $\color{#90a4ae}{\sf{\text{Core Features}}}$
+- Download individual posts or multiple files from Kemono/Coomer pages
+- Selective file downloads with checkbox selection
+- ZIP compression for multiple files with progress tracking
+- Individual downloads for large video files
+- Automatic file organization and naming
+- Compatible with both kemono.cr and coomer.st
+
+### $\color{#90a4ae}{\sf{\text{How It Works}}}$
+The extension automatically detects when you're on a Kemono or Coomer post page and provides a download interface. You can select which files to download and choose between ZIP compression or individual file downloads.
+
+**Download Options:**
+- **Selective Downloads:** Choose specific files using checkboxes
+- **ZIP Compression:** Download multiple files as a single compressed archive
+- **Individual Files:** Download large files separately for better performance
+- **Progress Tracking:** Monitor download progress in real-time
+
+Files are downloaded directly to your browser's default download folder.
+
+### $\color{#90a4ae}{\sf{\text{Installation}}}$
+1. Download the extension package from the [GitHub Releases](https://github.com/VoxDroid/KemonoDownloader/releases)
+2. Extract the ZIP file to a folder on your computer
+3. Choose the correct manifest for your browser and copy it to `manifest.json` inside the unpacked extension folder. This repository includes two per-browser manifests in the `browser-extension/` directory:
+   - **Chrome/Edge (Manifest V3):** `browser-extension/chrome_manifest.json`
+   - **Firefox (Manifest V2):** `browser-extension/firefox_manifest.json`
+
+   Quick copy commands:
+   - **PowerShell (Windows):**
+     - `Copy-Item .\browser-extension\chrome_manifest.json .\browser-extension\manifest.json`
+     - `Copy-Item .\browser-extension\firefox_manifest.json .\browser-extension\manifest.json`
+   - **Bash (macOS / Linux):**
+     - `cp browser-extension/chrome_manifest.json browser-extension/manifest.json`
+     - `cp browser-extension/firefox_manifest.json browser-extension/manifest.json`
+
+   > **Note:** `browser-extension/manifest.json` in this repository is a small placeholder file that explains how to choose and copy the proper per-browser manifest; please replace it with the appropriate manifest file before loading the extension.
+
+4. Follow the browser-specific installation instructions:
+   - **Chrome/Edge:** Enable Developer mode and load the unpacked extension (select the `browser-extension` directory)
+   - **Firefox:** Use the debugging console to load the temporary add-on (select the `manifest.json` in the `browser-extension` directory)
+
+For more details and troubleshooting, see `browser-extension/README.md`. The extension works with Chrome, Edge, and other Chromium-based browsers, as well as Firefox.
+
+## $\color{#546e7a}{\sf{\text{Installation}}}$ <a name="installation"></a>
 Kemono Downloader is now packaged using [Briefcase](https://briefcase.readthedocs.io/), making it easier to run or distribute as a native application across platforms. You can either build from source or use pre-compiled binaries where available.
 
-### Pre-Compiled Binaries - **.EXE file**
+### $\color{#90a4ae}{\sf{\text{Pre-Compiled Binaries - Executable}}}$
 Pre-compiled binaries are available through contributions on **Ko-fi**. If you’d like the convenience of ready-to-run executables instead of building from source, please support the project here: **[Get binaries on Ko-fi](https://ko-fi.com/izeno/shop)**  
 
-#### Available Binaries
+#### $\color{#90a4ae}{\sf{\text{Available Binaries}}}$
 - **Windows**:  
   - **Portable**: `W-KemonoDownloader-x86_64-Portable.exe`  
   - **Installer**: `W-KemonoDownloader-x86_64.msi`  
@@ -178,7 +300,7 @@ Pre-compiled binaries are available through contributions on **Ko-fi**. If you�
 
 Support ongoing development and get access here: **[Ko-fi Binaries Page](https://ko-fi.com/izeno/shop)**
 
-### Building with Briefcase (All Platforms)
+### $\color{#90a4ae}{\sf{\text{Building with Briefcase (All Platforms)}}}$
 1. Ensure you have **Python 3.9+** installed on your system (Windows, macOS, Linux).
 2. Clone this repository:
    ```bash
@@ -205,44 +327,44 @@ Support ongoing development and get access here: **[Ko-fi Binaries Page](https:/
    - **macOS**: `briefcase run macos`
    - **Linux**: `briefcase run linux`
    - **General**: `briefcase dev` *(Recommended)*
-   - **Note**: An internet connection is required to fetch content from Kemono.cr.
+   - **Note**: An internet connection is required to fetch content from Kemono.cr and Coomer.st.
 
-## Usage
+## $\color{#546e7a}{\sf{\text{Usage}}}$ <a name="usage"></a>
 Upon launching, you’ll see an introductory screen with a "Launch" button. Click it to enter the main interface, featuring four tabs: **Post Downloader**, **Creator Downloader**, **Settings**, and **Help**. The in-app Help tab contains a comprehensive user manual.
 
-### Getting Started
+### $\color{#90a4ae}{\sf{\text{Getting Started}}}$ <a name="getting-started"></a>
 - The application creates default directories (`Downloads`, `Cache`, `Other Files`) in the specified save location.
-- Ensure an active internet connection to access Kemono.cr content.
+- Ensure an active internet connection to access Kemono.cr and Coomer.st content.
 - Explore the Help tab for detailed instructions and troubleshooting tips.
 
-### Post Downloader Tab
-- **Purpose**: Download files from individual Kemono.cr posts.
+### $\color{#90a4ae}{\sf{\text{Post Downloader Tab}}}$ <a name="post-downloader-tab"></a>
+- **Purpose**: Download files from individual Kemono.cr and Coomer.st posts.
 - **How to Use**:
-  1. Enter a post URL (e.g., `https://kemono.cr/patreon/user/123456789/post/123456789`) in the "Enter post URL" field.
+  1. Enter a post URL (e.g., `https://kemono.cr/patreon/user/123456789/post/123456789` or `https://coomer.st/patreon/user/123456789/post/123456789`) in the "Enter post URL" field.
   2. Click "Add to Queue" to add it to the list.
   3. Click the eye icon to view files, filter by type (e.g., JPG, ZIP), and select files to download.
   4. Click "Download" to start, and monitor progress with the progress bars and console.
 
-### Creator Downloader Tab
+### $\color{#90a4ae}{\sf{\text{Creator Downloader Tab}}}$ <a name="creator-downloader-tab"></a>
 - **Purpose**: Bulk download content from a creator's profile.
 - **How to Use**:
-  1. Enter a creator URL (e.g., `https://kemono.cr/patreon/user/123456789`) in the "Enter creator URL" field.
+  1. Enter a creator URL (e.g., `https://kemono.cr/patreon/user/123456789` or `https://coomer.st/patreon/user/123456789`) in the "Enter creator URL" field.
   2. Click "Add to Queue" to add it to the list.
   3. Click the eye icon to fetch posts, configure options (Main File, Attachments, Content Images), and select posts.
   4. Click "Download" to begin, and track progress via the interface.
 
-### Settings Tab
+### $\color{#90a4ae}{\sf{\text{Settings Tab}}}$ <a name="settings-tab"></a>
 - **Purpose**: Customize the application’s behavior.
 - **How to Use**:
   1. Set the folder name and save directory for downloads.
   2. Adjust simultaneous downloads (1-10) using the slider or spinbox.
   3. Click "Apply Changes" to save.
 
-### Help Tab
+### $\color{#90a4ae}{\sf{\text{Help Tab}}}$ <a name="help-tab"></a>
 - **Purpose**: Access the embedded user manual.
 - **How to Use**: Navigate to the Help tab to read detailed guides, examples, and support information.
 
-## Screenshots
+## $\color{#546e7a}{\sf{\text{Screenshots}}}$ <a name="screenshots"></a>
 
 Here are previews of the main tabs in Kemono Downloader:
 
@@ -271,26 +393,26 @@ Here are previews of the main tabs in Kemono Downloader:
   </tr>
 </table>
 
-## Releases
+## $\color{#546e7a}{\sf{\text{Releases}}}$ <a name="releases"></a>
 - **Windows**: Pre-compiled `.exe` available in the [Releases section](https://github.com/VoxDroid/KemonoDownloader/releases).
 - **macOS**: Pre-compiled universal `.dmg` (x86_64 and Apple Silicon) available in the [Releases section](https://github.com/VoxDroid/KemonoDownloader/releases).
 - **Linux**: Pre-compiled `.rpm` (for Fedora/Red Hat), `.deb` (for Debian/Ubuntu), or `.pkg.tar.tsz` (for Arch/Pacman) available in the [Releases page](https://github.com/VoxDroid/KemonoDownloader/releases).
 - Check release notes for details on new features, bug fixes, and version updates.
 - The Briefcase-built Python source remains the primary method, supporting all platforms with proper setup.
 
-## Support
+## $\color{#546e7a}{\sf{\text{Support}}}$ <a name="support"></a>
 For ways to get help, report issues, or support the project’s development, please see the [Support page](SUPPORT.md).
 
-## Contributing
+## $\color{#546e7a}{\sf{\text{Contributing}}}$ <a name="contributing"></a>
 Kemono Downloader is open-source, and contributions are encouraged! Please read our [Contributing Guidelines](CONTRIBUTING.md), [Code of Conduct](CODE_OF_CONDUCT.md), and [Security Policy](SECURITY.md) before submitting issues or pull requests. Use the appropriate [issue templates](.github/ISSUE_TEMPLATE/) for reporting bugs, suggesting features, or other contributions, and the [Pull Request template](.github/PULL_REQUEST_TEMPLATE.md) for code submissions.
 
-## Security
+## $\color{#546e7a}{\sf{\text{Security}}}$ <a name="security"></a>
 If you discover a security vulnerability, please follow our [Security Policy](SECURITY.md) by emailing [izeno.contact@gmail.com](mailto:izeno.contact@gmail.com) or using the [Security Report issue template](.github/ISSUE_TEMPLATE/security_report.yml) for non-sensitive issues.
 
-## License
+## $\color{#546e7a}{\sf{\text{License}}}$ <a name="license"></a>
 This project is licensed under the [MIT License](LICENSE). Use, modify, and distribute it freely per the license terms.
 
-## Dependencies
+## $\color{#546e7a}{\sf{\text{Dependencies}}}$ <a name="dependencies"></a>
 To build from source, install the following Python packages:
 - `PyQt6` (for the GUI)
 - `requests` (for HTTP requests)
@@ -302,11 +424,11 @@ Create a `requirements.txt` file with these dependencies and run `pip install -r
 
 ---
 
-## Special Thanks & Contributors
+## $\color{#546e7a}{\sf{\text{Special Thanks and Contributors}}}$ <a name="special-thanks--contributors"></a>
 
 We’re incredibly grateful to our amazing contributors who have helped shape **Kemono Downloader** into what it is today. 
 
-## Contributor Profiles
+### $\color{#90a4ae}{\sf{\text{Contributor Profiles}}}$ <a name="contributor-profiles"></a>
 
 <p align="left">
   <a href="https://github.com/VoxDroid">
@@ -327,11 +449,11 @@ We’re incredibly grateful to our amazing contributors who have helped shape **
 </p>
 
 
-## Project Star Statistics
+## $\color{#546e7a}{\sf{\text{Project Star Statistics}}}$ <a name="project-star-statistics"></a>
 
 Check out how **Kemono Downloader** is doing in the GitHub community!
 
-## Star History
+## $\color{#546e7a}{\sf{\text{Star History}}}$ <a name="star-history"></a>
 
 [![Star History Chart](https://api.star-history.com/svg?repos=VoxDroid/KemonoDownloader&type=Date)](https://www.star-history.com/#VoxDroid/KemonoDownloader&Date)
 
